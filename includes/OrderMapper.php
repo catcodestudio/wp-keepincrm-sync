@@ -30,7 +30,11 @@ class OrderMapper {
 	public static function build( \WC_Order $order ): array {
 		$cfg       = Settings::all();
 		$skip_zero = 'yes' === ( $cfg['skip_zero_price'] ?? 'yes' );
+		$currency  = (string) $order->get_currency();
 
+		// Each line item becomes a "job" whose product data is nested under
+		// product_attributes (title/price/currency) — KeepinCRM rejects a flat
+		// price on the job itself.
 		$jobs = array();
 		foreach ( $order->get_items( 'line_item' ) as $item ) {
 			/** @var \WC_Order_Item_Product $item */
@@ -43,10 +47,21 @@ class OrderMapper {
 				continue;
 			}
 
+			$name    = (string) $item->get_name();
+			$product = $item->get_product();
+			$product_attributes = array(
+				'title'    => $name,
+				'price'    => $price,
+				'currency' => $currency,
+			);
+			$sku = $product ? (string) $product->get_sku() : '';
+			if ( '' !== $sku ) {
+				$product_attributes['sku'] = $sku;
+			}
 			$jobs[] = array(
-				'title'  => (string) $item->get_name(),
-				'amount' => $qty,
-				'price'  => (string) $price,
+				'amount'             => $qty,
+				'title'              => $name,
+				'product_attributes' => $product_attributes,
 			);
 		}
 
@@ -55,10 +70,15 @@ class OrderMapper {
 			$ship_cost = round( (float) $order->get_shipping_total() + (float) $order->get_shipping_tax(), 2 );
 			if ( $ship_cost > 0 ) {
 				$ship_title = (string) $order->get_shipping_method();
+				$ship_title = '' !== $ship_title ? $ship_title : __( 'Доставка', 'keepincrm-sync-for-woocommerce' );
 				$jobs[]     = array(
-					'title'  => '' !== $ship_title ? $ship_title : __( 'Доставка', 'keepincrm-sync-for-woocommerce' ),
-					'amount' => 1,
-					'price'  => (string) $ship_cost,
+					'amount'             => 1,
+					'title'              => $ship_title,
+					'product_attributes' => array(
+						'title'    => $ship_title,
+						'price'    => $ship_cost,
+						'currency' => $currency,
+					),
 				);
 			}
 		}
@@ -73,9 +93,11 @@ class OrderMapper {
 			$person = __( 'Клієнт', 'keepincrm-sync-for-woocommerce' );
 		}
 
+		// KeepinCRM uses `company` as the client's display name ("Назва чи ПІБ")
+		// and rejects a blank value, so it carries the buyer's full name too.
 		$client = array(
+			'company' => $person,
 			'person'  => $person,
-			'company' => '', // required by the schema; blank for a B2C person.
 			'lead'    => true,
 			'email'   => (string) $order->get_billing_email(),
 		);
@@ -83,12 +105,14 @@ class OrderMapper {
 		if ( '' !== $phone ) {
 			$client['phones'] = array( $phone );
 		}
-		$address = self::address_line( $order );
-		if ( '' !== $address ) {
-			$client['comment'] = $address;
-		}
 
 		$comment = (string) $order->get_customer_note();
+		// The delivery address rides in the agreement comment — KeepinCRM rejects
+		// a comment on the client sub-record.
+		$address = self::address_line( $order );
+		if ( '' !== $address ) {
+			$comment = '' !== $comment ? $comment . ' | ' . $address : $address;
+		}
 		$pay     = (string) $order->get_payment_method_title();
 		if ( '' !== $pay ) {
 			$comment = '' !== $comment ? $comment . ' | ' . $pay : $pay;

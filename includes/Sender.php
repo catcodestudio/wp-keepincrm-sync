@@ -128,9 +128,12 @@ class Sender {
 
 		$existing = (int) $order->get_meta( self::META_AGREEMENT_ID );
 		if ( $existing > 0 ) {
-			// Update an existing agreement in place via PATCH /agreements/{id}
-			// with the same nested field set the create call uses.
+			// Update an existing agreement in place via PATCH /agreements/{id}.
+			// Only scalar agreement fields are patched — resending jobs_attributes
+			// or client_attributes would duplicate line items / the client in
+			// KeepinCRM ("Товар вже зайнятий").
 			$fields = OrderMapper::build( $order );
+			unset( $fields['jobs_attributes'], $fields['client_attributes'], $fields['products_total_as_total'] );
 			$client = new Client();
 			$res    = $client->update_agreement( $existing, $fields );
 
