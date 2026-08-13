@@ -12,6 +12,8 @@ Sends every WooCommerce order to KeepinCRM as an agreement: at checkout or on a 
 
 == Description ==
 
+KeepinCRM is a third-party product; this is an independent integration, not affiliated with or endorsed by KeepinCRM.
+
 The plugin connects WooCommerce to KeepinCRM through the public KeepinCRM REST API. Every new order in your shop is created in KeepinCRM as an agreement with a lead client, the line items and a comment carrying the delivery address, the payment method and the paid/unpaid mark.
 
 = Features =

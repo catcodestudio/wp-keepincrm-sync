@@ -1,0 +1,309 @@
+# Copyright (C) 2026 CatCode
+# This file is distributed under the GPLv2 or later.
+msgid ""
+msgstr ""
+"Project-Id-Version: CatCode Order Sync with KeepinCRM for WooCommerce 0.2.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/catcode-order-sync-with-keepincrm-for-woocommerce\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-08-13T08:17:22+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: catcode-order-sync-with-keepincrm-for-woocommerce\n"
+
+#. Plugin Name of the plugin
+#: catcode-order-sync-with-keepincrm-for-woocommerce.php
+msgid "CatCode Order Sync with KeepinCRM for WooCommerce"
+msgstr ""
+
+#. Plugin URI of the plugin
+#: catcode-order-sync-with-keepincrm-for-woocommerce.php
+msgid "https://catcode.com.ua/modules/keepincrm-sync-for-woocommerce/"
+msgstr ""
+
+#. Description of the plugin
+#: catcode-order-sync-with-keepincrm-for-woocommerce.php
+msgid "Sends WooCommerce orders to KeepinCRM as agreements: created at checkout or on a status change, with de-duplication, retries and an event log."
+msgstr ""
+
+#. Author of the plugin
+#: catcode-order-sync-with-keepincrm-for-woocommerce.php
+msgid "CatCode"
+msgstr ""
+
+#. Author URI of the plugin
+#: catcode-order-sync-with-keepincrm-for-woocommerce.php
+msgid "https://catcode.com.ua"
+msgstr ""
+
+#: catcode-order-sync-with-keepincrm-for-woocommerce.php:86
+msgid "CatCode Order Sync with KeepinCRM for WooCommerce requires an active WooCommerce installation."
+msgstr ""
+
+#: includes/Admin/OrderMetaBox.php:26
+msgid "KeepinCRM"
+msgstr ""
+
+#: includes/Admin/OrderMetaBox.php:40
+msgid "Order not found."
+msgstr ""
+
+#: includes/Admin/OrderMetaBox.php:50
+msgid "Sent to KeepinCRM"
+msgstr ""
+
+#: includes/Admin/OrderMetaBox.php:51
+msgid "KeepinCRM ID:"
+msgstr ""
+
+#: includes/Admin/OrderMetaBox.php:53
+msgid "Sent at:"
+msgstr ""
+
+#: includes/Admin/OrderMetaBox.php:55
+msgid "Resending updates the existing agreement in KeepinCRM (PATCH)."
+msgstr ""
+
+#: includes/Admin/OrderMetaBox.php:57
+msgid "Send failed"
+msgstr ""
+
+#: includes/Admin/OrderMetaBox.php:62
+msgid "Not sent yet"
+msgstr ""
+
+#: includes/Admin/OrderMetaBox.php:69
+msgid "One attempt got no response from KeepinCRM (timeout). The agreement may have been created anyway — check the CRM before resending."
+msgstr ""
+
+#: includes/Admin/OrderMetaBox.php:86
+msgid "Send to KeepinCRM"
+msgstr ""
+
+#: includes/Admin/OrderMetaBox.php:86
+msgid "Resend"
+msgstr ""
+
+#. translators: %s — link to the log page.
+#: includes/Admin/OrderMetaBox.php:91
+#, php-format
+msgid "Event log: <a href=\"%s\">WooCommerce → KeepinCRM Sync</a>."
+msgstr ""
+
+#: includes/Admin/OrderMetaBox.php:99
+#: includes/Admin/SettingsPage.php:193
+#: includes/Admin/SettingsPage.php:231
+msgid "You do not have permission to do this."
+msgstr ""
+
+#: includes/Admin/SettingsPage.php:37
+#: includes/Admin/SettingsPage.php:38
+#: includes/Admin/SettingsPage.php:52
+msgid "KeepinCRM Sync"
+msgstr ""
+
+#: includes/Admin/SettingsPage.php:53
+msgid "Sends WooCommerce orders to KeepinCRM automatically."
+msgstr ""
+
+#: includes/Admin/SettingsPage.php:62
+msgid "Settings"
+msgstr ""
+
+#: includes/Admin/SettingsPage.php:63
+msgid "Log"
+msgstr ""
+
+#: includes/Admin/SettingsPage.php:84
+msgid "Connection"
+msgstr ""
+
+#: includes/Admin/SettingsPage.php:87
+msgid "API token (X-Auth-Token)"
+msgstr ""
+
+#: includes/Admin/SettingsPage.php:88
+msgid "•••••• saved — type a new one to replace it"
+msgstr ""
+
+#: includes/Admin/SettingsPage.php:89
+msgid "KeepinCRM account → Settings → Company profile → API tab (the account owner only). The token travels in the X-Auth-Token header and is stored encrypted. Note: KeepinCRM does not expose its API on the free plan."
+msgstr ""
+
+#: includes/Admin/SettingsPage.php:89
+msgid "Token saved."
+msgstr ""
+
+#: includes/Admin/SettingsPage.php:95
+msgid "CRM routing (optional)"
+msgstr ""
+
+#: includes/Admin/SettingsPage.php:98
+msgid "Funnel ID (funnel_id)"
+msgstr ""
+
+#: includes/Admin/SettingsPage.php:99
+msgid "Stage ID (stage_id)"
+msgstr ""
+
+#: includes/Admin/SettingsPage.php:100
+msgid "Source ID (source_id)"
+msgstr ""
+
+#: includes/Admin/SettingsPage.php:101
+msgid "Responsible user ID (main_responsible_id)"
+msgstr ""
+
+#: includes/Admin/SettingsPage.php:109
+msgid "Leave empty to let KeepinCRM pick its own defaults. The ids come from your account dictionaries (funnels, stages, sources, employees)."
+msgstr ""
+
+#: includes/Admin/SettingsPage.php:113
+msgid "Order sending"
+msgstr ""
+
+#: includes/Admin/SettingsPage.php:116
+msgid "Trigger statuses"
+msgstr ""
+
+#: includes/Admin/SettingsPage.php:122
+msgid "An order goes to KeepinCRM right after checkout, or when it moves into one of the selected statuses — unless it is there already."
+msgstr ""
+
+#: includes/Admin/SettingsPage.php:125
+msgid "Payment status"
+msgstr ""
+
+#: includes/Admin/SettingsPage.php:126
+msgid "Mark online payments (add “✅ Paid online” to the agreement comment for paid orders)"
+msgstr ""
+
+#: includes/Admin/SettingsPage.php:129
+msgid "Zero-price items"
+msgstr ""
+
+#: includes/Admin/SettingsPage.php:130
+msgid "Skip line items priced at 0 (gifts, samples)"
+msgstr ""
+
+#: includes/Admin/SettingsPage.php:133
+#: includes/OrderMapper.php:73
+msgid "Shipping"
+msgstr ""
+
+#: includes/Admin/SettingsPage.php:134
+msgid "Send the shipping cost as a separate agreement line"
+msgstr ""
+
+#: includes/Admin/SettingsPage.php:140
+msgid "Save settings"
+msgstr ""
+
+#: includes/Admin/SettingsPage.php:148
+msgid "Test connection"
+msgstr ""
+
+#: includes/Admin/SettingsPage.php:149
+msgid "Sends a GET /clients/statuses request with the stored token."
+msgstr ""
+
+#: includes/Admin/SettingsPage.php:157
+msgid "Recent events"
+msgstr ""
+
+#: includes/Admin/SettingsPage.php:160
+msgid "No events yet."
+msgstr ""
+
+#: includes/Admin/SettingsPage.php:166
+msgid "Date"
+msgstr ""
+
+#: includes/Admin/SettingsPage.php:167
+msgid "Order"
+msgstr ""
+
+#: includes/Admin/SettingsPage.php:168
+msgid "Event"
+msgstr ""
+
+#: includes/Admin/SettingsPage.php:169
+msgid "Attempt"
+msgstr ""
+
+#: includes/Admin/SettingsPage.php:171
+msgid "Result"
+msgstr ""
+
+#: includes/Admin/SettingsPage.php:172
+msgid "Message"
+msgstr ""
+
+#: includes/Admin/SettingsPage.php:184
+msgid "Error"
+msgstr ""
+
+#: includes/Admin/SettingsPage.php:226
+msgid "Settings saved."
+msgstr ""
+
+#. translators: %d — HTTP status code.
+#: includes/Admin/SettingsPage.php:242
+#, php-format
+msgid "Connection successful (HTTP %d)."
+msgstr ""
+
+#. translators: %s — error details.
+#: includes/Admin/SettingsPage.php:245
+#, php-format
+msgid "Connection error: %s"
+msgstr ""
+
+#: includes/Api/Client.php:85
+#: includes/Sender.php:194
+msgid "The KeepinCRM API token is not set."
+msgstr ""
+
+#: includes/Api/Client.php:160
+msgid "Invalid API token (HTTP 401)."
+msgstr ""
+
+#: includes/OrderMapper.php:93
+msgid "Customer"
+msgstr ""
+
+#. translators: %s: order total
+#: includes/OrderMapper.php:125
+#, php-format
+msgid "✅ Paid online (%s)"
+msgstr ""
+
+#. translators: 1: order number, 2: shop host.
+#: includes/OrderMapper.php:131
+#, php-format
+msgid "Order #%1$s (%2$s)"
+msgstr ""
+
+#. translators: %d — KeepinCRM order id.
+#: includes/Sender.php:218
+#: includes/Sender.php:243
+#, php-format
+msgid "Order updated in KeepinCRM (ID %d)."
+msgstr ""
+
+#: includes/Sender.php:233
+msgid "This order is already being sent to KeepinCRM. Reload the page in a few seconds."
+msgstr ""
+
+#: includes/Sender.php:254
+msgid "Order sent to KeepinCRM."
+msgstr ""
+
+#. translators: %d — KeepinCRM order id.
+#: includes/Sender.php:286
+#, php-format
+msgid "Order sent to KeepinCRM, agreement ID %d."
+msgstr ""
