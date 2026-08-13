@@ -86,7 +86,7 @@ class SettingsPage {
 
 		echo '<tr><th scope="row"><label for="cckc-api-key">' . esc_html__( 'API token (X-Auth-Token)', 'catcode-order-sync-with-keepincrm-for-woocommerce' ) . '</label></th><td>';
 		echo '<input type="password" class="regular-text" id="cckc-api-key" name="api_key" value="" autocomplete="new-password" placeholder="' . esc_attr( $has_key ? __( '•••••• saved — type a new one to replace it', 'catcode-order-sync-with-keepincrm-for-woocommerce' ) : '' ) . '"/>';
-		echo '<p class="description">' . esc_html__( 'KeepinCRM account → Settings → Integrations → API. The token travels in the X-Auth-Token header and is stored encrypted. Note: KeepinCRM does not expose its API on the free plan.', 'catcode-order-sync-with-keepincrm-for-woocommerce' ) . ( $has_key ? ' <span class="cckc-saved">' . esc_html__( 'Token saved.', 'catcode-order-sync-with-keepincrm-for-woocommerce' ) . '</span>' : '' ) . '</p>';
+		echo '<p class="description">' . esc_html__( 'KeepinCRM account → Settings → Company profile → API tab (the account owner only). The token travels in the X-Auth-Token header and is stored encrypted. Note: KeepinCRM does not expose its API on the free plan.', 'catcode-order-sync-with-keepincrm-for-woocommerce' ) . ( $has_key ? ' <span class="cckc-saved">' . esc_html__( 'Token saved.', 'catcode-order-sync-with-keepincrm-for-woocommerce' ) . '</span>' : '' ) . '</p>';
 		echo '</td></tr>';
 
 		echo '</table></div>';

@@ -48,14 +48,14 @@ The plugin connects WooCommerce to KeepinCRM through the public KeepinCRM REST A
 
 1. Upload the plugin folder to `/wp-content/plugins/`, or install the zip from Plugins → Add New → Upload.
 2. Activate the plugin.
-3. Go to WooCommerce → KeepinCRM Sync and paste your API token (KeepinCRM account → Settings → Integrations → API).
+3. Go to WooCommerce → KeepinCRM Sync and paste your API token (KeepinCRM account → Settings → Company profile → API tab).
 4. Press "Test connection", pick the trigger statuses and save.
 
 == Frequently Asked Questions ==
 
 = Where do I get the API token? =
 
-In your KeepinCRM account: Settings → Integrations → API. Only the account owner can create a token. The token is kept in the WordPress database in encrypted form.
+In your KeepinCRM account: Settings → Company profile → API tab. Only the account owner can create a token. The token is kept in the WordPress database in encrypted form.
 
 = Why does the connection test say "Недоступно на безкоштовному тарифі"? =
 
