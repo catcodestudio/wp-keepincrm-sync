@@ -1,0 +1,198 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: CatCode Order Sync with KeepinCRM for WooCommerce 0.2.0\n"
+"Report-Msgid-Bugs-To: https://catcode.com.ua/\n"
+"Last-Translator: CatCode <info@catcode.com.ua>\n"
+"Language-Team: Ukrainian\n"
+"Language: uk\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"X-Domain: catcode-order-sync-with-keepincrm-for-woocommerce\n"
+
+msgid "An order goes to KeepinCRM right after checkout, or when it moves into one of the selected statuses — unless it is there already."
+msgstr "Замовлення відправляється в KeepinCRM одразу після checkout або при переході в один із вибраних статусів (якщо ще не відправлено)."
+
+msgid "API token (X-Auth-Token)"
+msgstr "API-токен (X-Auth-Token)"
+
+msgid "Attempt"
+msgstr "Спроба"
+
+msgid "CatCode Order Sync with KeepinCRM for WooCommerce requires an active WooCommerce installation."
+msgstr "Для роботи «CatCode Order Sync with KeepinCRM for WooCommerce» потрібен активний WooCommerce."
+
+msgid "Connection"
+msgstr "Підключення"
+
+msgid "Connection error: %s"
+msgstr "Помилка з’єднання: %s"
+
+msgid "Connection successful (HTTP %d)."
+msgstr "З’єднання успішне (HTTP %d)."
+
+msgid "CRM routing (optional)"
+msgstr "Маршрутизація в CRM (необов’язково)"
+
+msgid "Customer"
+msgstr "Клієнт"
+
+msgid "Date"
+msgstr "Дата"
+
+msgid "Error"
+msgstr "Помилка"
+
+msgid "Event"
+msgstr "Подія"
+
+msgid "Event log: <a href=\"%s\">WooCommerce → KeepinCRM Sync</a>."
+msgstr "Журнал подій: <a href=\"%s\">WooCommerce → KeepinCRM Sync</a>."
+
+msgid "Funnel ID (funnel_id)"
+msgstr "ID воронки (funnel_id)"
+
+msgid "Invalid API token (HTTP 401)."
+msgstr "Невірний API-токен (HTTP 401)."
+
+msgid "KeepinCRM"
+msgstr "KeepinCRM"
+
+msgid "KeepinCRM account → Settings → Integrations → API. The token travels in the X-Auth-Token header and is stored encrypted. Note: KeepinCRM does not expose its API on the free plan."
+msgstr "Кабінет KeepinCRM → Налаштування → Інтеграції → API. Токен передається у заголовку X-Auth-Token і зберігається у зашифрованому вигляді. Увага: на безкоштовному тарифі KeepinCRM API недоступне."
+
+msgid "KeepinCRM ID:"
+msgstr "KeepinCRM ID:"
+
+msgid "KeepinCRM Sync"
+msgstr "KeepinCRM Sync"
+
+msgid "Leave empty to let KeepinCRM pick its own defaults. The ids come from your account dictionaries (funnels, stages, sources, employees)."
+msgstr "Залиште порожнім, щоб KeepinCRM обрав значення за замовчуванням. Значення беруться з довідників кабінету (воронки, етапи, джерела, працівники)."
+
+msgid "Log"
+msgstr "Журнал"
+
+msgid "Mark online payments (add “✅ Paid online” to the agreement comment for paid orders)"
+msgstr "Позначати оплату онлайн (для сплачених замовлень додавати «✅ Оплачено онлайн» у коментар заявки)"
+
+msgid "Message"
+msgstr "Повідомлення"
+
+msgid "No events yet."
+msgstr "Подій ще немає."
+
+msgid "Not sent yet"
+msgstr "Ще не відправлено"
+
+msgid "One attempt got no response from KeepinCRM (timeout). The agreement may have been created anyway — check the CRM before resending."
+msgstr "Одна зі спроб не отримала відповіді від KeepinCRM (таймаут). Угода могла все одно створитись — перевірте CRM, перш ніж відправляти повторно."
+
+msgid "Order"
+msgstr "Замовлення"
+
+msgid "Order #%1$s (%2$s)"
+msgstr "Замовлення #%1$s (%2$s)"
+
+msgid "Order not found."
+msgstr "Замовлення не знайдено."
+
+msgid "Order sending"
+msgstr "Відправка замовлень"
+
+msgid "Order sent to KeepinCRM, agreement ID %d."
+msgstr "Замовлення відправлено в KeepinCRM, ID угоди %d."
+
+msgid "Order sent to KeepinCRM."
+msgstr "Замовлення відправлено в KeepinCRM."
+
+msgid "Order updated in KeepinCRM (ID %d)."
+msgstr "Замовлення оновлено в KeepinCRM (ID %d)."
+
+msgid "Payment status"
+msgstr "Статус оплати"
+
+msgid "Recent events"
+msgstr "Останні події"
+
+msgid "Resend"
+msgstr "Відправити повторно"
+
+msgid "Resending updates the existing agreement in KeepinCRM (PATCH)."
+msgstr "Повторна відправка оновить наявну угоду в KeepinCRM (PATCH)."
+
+msgid "Responsible user ID (main_responsible_id)"
+msgstr "ID відповідального (main_responsible_id)"
+
+msgid "Result"
+msgstr "Результат"
+
+msgid "Save settings"
+msgstr "Зберегти налаштування"
+
+msgid "Send failed"
+msgstr "Помилка відправки"
+
+msgid "Send the shipping cost as a separate agreement line"
+msgstr "Передавати вартість доставки окремим рядком угоди"
+
+msgid "Send to KeepinCRM"
+msgstr "Відправити в KeepinCRM"
+
+msgid "Sends a GET /clients/statuses request with the stored token."
+msgstr "Виконує запит GET /clients/statuses зі збереженим токеном."
+
+msgid "Sends WooCommerce orders to KeepinCRM automatically."
+msgstr "Автоматична відправка замовлень WooCommerce у KeepinCRM."
+
+msgid "Sent at:"
+msgstr "Коли:"
+
+msgid "Sent to KeepinCRM"
+msgstr "Відправлено в KeepinCRM"
+
+msgid "Settings"
+msgstr "Налаштування"
+
+msgid "Settings saved."
+msgstr "Налаштування збережено."
+
+msgid "Shipping"
+msgstr "Доставка"
+
+msgid "Skip line items priced at 0 (gifts, samples)"
+msgstr "Пропускати позиції з ціною 0 (подарунки, семпли)"
+
+msgid "Source ID (source_id)"
+msgstr "ID джерела (source_id)"
+
+msgid "Stage ID (stage_id)"
+msgstr "ID етапу (stage_id)"
+
+msgid "Test connection"
+msgstr "Перевірити з’єднання"
+
+msgid "The KeepinCRM API token is not set."
+msgstr "API-ключ KeepinCRM не задано."
+
+msgid "Token saved."
+msgstr "Токен збережено."
+
+msgid "Trigger statuses"
+msgstr "Тригерні статуси"
+
+msgid "You do not have permission to do this."
+msgstr "Немає прав"
+
+msgid "Zero-price items"
+msgstr "Товари з нульовою ціною"
+
+msgid "•••••• saved — type a new one to replace it"
+msgstr "•••••• збережено — введіть щоб замінити"
+
+msgid "✅ Paid online (%s)"
+msgstr "✅ Оплачено онлайн (%s)"
+
+msgid "This order is already being sent to KeepinCRM. Reload the page in a few seconds."
+msgstr "Це замовлення вже відправляється в KeepinCRM. Перезавантажте сторінку за кілька секунд."

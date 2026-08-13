@@ -6,7 +6,7 @@
  *   Base:   https://api.keepincrm.com
  *   Auth:   header  X-Auth-Token: <token>
  *
- * Order creation posts an "agreement" (угода):
+ * Order creation posts an "agreement":
  *   POST /agreements                       -> 201 { id, created_at, updated_at }
  * Update of an existing agreement:
  *   PATCH /agreements/{id}                 -> 200
@@ -82,7 +82,7 @@ class Client {
 				'status' => 0,
 				'body'   => '',
 				'json'   => null,
-				'error'  => __( 'API-токен KeepinCRM не задано.', 'keepincrm-sync-for-woocommerce' ),
+				'error'  => __( 'The KeepinCRM API token is not set.', 'catcode-order-sync-with-keepincrm-for-woocommerce' ),
 			);
 		}
 
@@ -157,7 +157,7 @@ class Client {
 			}
 		}
 		if ( 401 === $status ) {
-			return __( 'Невірний API-токен (HTTP 401).', 'keepincrm-sync-for-woocommerce' );
+			return __( 'Invalid API token (HTTP 401).', 'catcode-order-sync-with-keepincrm-for-woocommerce' );
 		}
 		return 'HTTP ' . $status;
 	}

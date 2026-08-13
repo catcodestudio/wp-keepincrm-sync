@@ -19,19 +19,23 @@ defined( 'ABSPATH' ) || exit;
 
 class SettingsPage {
 
-	private const SLUG = 'keepincrm-sync-for-woocommerce';
+	private const SLUG = 'catcode-order-sync-with-keepincrm-for-woocommerce';
+
+	/** @var string Hook suffix of our own admin screen. */
+	private $hook_suffix = '';
 
 	public function __construct() {
 		add_action( 'admin_menu', array( $this, 'register_menu' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 		add_action( 'admin_post_cckc_save_settings', array( $this, 'handle_save' ) );
 		add_action( 'admin_post_cckc_test_connection', array( $this, 'handle_test' ) );
 	}
 
 	public function register_menu(): void {
-		add_submenu_page(
+		$this->hook_suffix = (string) add_submenu_page(
 			'woocommerce',
-			__( 'KeepinCRM Sync', 'keepincrm-sync-for-woocommerce' ),
-			__( 'KeepinCRM Sync', 'keepincrm-sync-for-woocommerce' ),
+			__( 'KeepinCRM Sync', 'catcode-order-sync-with-keepincrm-for-woocommerce' ),
+			__( 'KeepinCRM Sync', 'catcode-order-sync-with-keepincrm-for-woocommerce' ),
 			'manage_woocommerce',
 			self::SLUG,
 			array( $this, 'render' )
@@ -44,9 +48,9 @@ class SettingsPage {
 		}
 		$tab = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( (string) $_GET['tab'] ) ) : 'settings'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
-		echo '<div class="wrap ccks-wrap">';
-		echo '<h1>' . esc_html__( 'KeepinCRM Sync', 'keepincrm-sync-for-woocommerce' ) . '</h1>';
-		echo '<p class="ccks-lead">' . esc_html__( 'Автоматична відправка замовлень WooCommerce у KeepinCRM.', 'keepincrm-sync-for-woocommerce' ) . '</p>';
+		echo '<div class="wrap cckc-wrap">';
+		echo '<h1>' . esc_html__( 'KeepinCRM Sync', 'catcode-order-sync-with-keepincrm-for-woocommerce' ) . '</h1>';
+		echo '<p class="cckc-lead">' . esc_html__( 'Sends WooCommerce orders to KeepinCRM automatically.', 'catcode-order-sync-with-keepincrm-for-woocommerce' ) . '</p>';
 
 		if ( isset( $_GET['cckc_msg'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$type = isset( $_GET['cckc_err'] ) ? 'notice-error' : 'notice-success'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -55,8 +59,8 @@ class SettingsPage {
 
 		$base = admin_url( 'admin.php?page=' . self::SLUG );
 		echo '<h2 class="nav-tab-wrapper">';
-		echo '<a href="' . esc_url( $base ) . '" class="nav-tab' . ( 'log' !== $tab ? ' nav-tab-active' : '' ) . '">' . esc_html__( 'Налаштування', 'keepincrm-sync-for-woocommerce' ) . '</a>';
-		echo '<a href="' . esc_url( $base . '&tab=log' ) . '" class="nav-tab' . ( 'log' === $tab ? ' nav-tab-active' : '' ) . '">' . esc_html__( 'Журнал', 'keepincrm-sync-for-woocommerce' ) . '</a>';
+		echo '<a href="' . esc_url( $base ) . '" class="nav-tab' . ( 'log' !== $tab ? ' nav-tab-active' : '' ) . '">' . esc_html__( 'Settings', 'catcode-order-sync-with-keepincrm-for-woocommerce' ) . '</a>';
+		echo '<a href="' . esc_url( $base . '&tab=log' ) . '" class="nav-tab' . ( 'log' === $tab ? ' nav-tab-active' : '' ) . '">' . esc_html__( 'Log', 'catcode-order-sync-with-keepincrm-for-woocommerce' ) . '</a>';
 		echo '</h2>';
 
 		if ( 'log' === $tab ) {
@@ -65,7 +69,6 @@ class SettingsPage {
 			$this->render_settings();
 		}
 
-		$this->assets();
 		echo '</div>';
 	}
 
@@ -77,64 +80,64 @@ class SettingsPage {
 		echo '<input type="hidden" name="action" value="cckc_save_settings"/>';
 		wp_nonce_field( 'cckc_save_settings' );
 
-		echo '<div class="ccks-card">';
-		echo '<h2>' . esc_html__( 'Підключення', 'keepincrm-sync-for-woocommerce' ) . '</h2>';
+		echo '<div class="cckc-card">';
+		echo '<h2>' . esc_html__( 'Connection', 'catcode-order-sync-with-keepincrm-for-woocommerce' ) . '</h2>';
 		echo '<table class="form-table" role="presentation">';
 
-		echo '<tr><th scope="row"><label for="ccks-api-key">' . esc_html__( 'API-токен (X-Auth-Token)', 'keepincrm-sync-for-woocommerce' ) . '</label></th><td>';
-		echo '<input type="password" class="regular-text" id="ccks-api-key" name="api_key" value="" autocomplete="new-password" placeholder="' . esc_attr( $has_key ? __( '•••••• збережено — введіть щоб замінити', 'keepincrm-sync-for-woocommerce' ) : '' ) . '"/>';
-		echo '<p class="description">' . esc_html__( 'Кабінет KeepinCRM → Налаштування → Інтеграції → API. Токен передається у заголовку X-Auth-Token і зберігається у зашифрованому вигляді.', 'keepincrm-sync-for-woocommerce' ) . ( $has_key ? ' <span class="ccks-saved">' . esc_html__( 'Токен збережено.', 'keepincrm-sync-for-woocommerce' ) . '</span>' : '' ) . '</p>';
+		echo '<tr><th scope="row"><label for="cckc-api-key">' . esc_html__( 'API token (X-Auth-Token)', 'catcode-order-sync-with-keepincrm-for-woocommerce' ) . '</label></th><td>';
+		echo '<input type="password" class="regular-text" id="cckc-api-key" name="api_key" value="" autocomplete="new-password" placeholder="' . esc_attr( $has_key ? __( '•••••• saved — type a new one to replace it', 'catcode-order-sync-with-keepincrm-for-woocommerce' ) : '' ) . '"/>';
+		echo '<p class="description">' . esc_html__( 'KeepinCRM account → Settings → Integrations → API. The token travels in the X-Auth-Token header and is stored encrypted. Note: KeepinCRM does not expose its API on the free plan.', 'catcode-order-sync-with-keepincrm-for-woocommerce' ) . ( $has_key ? ' <span class="cckc-saved">' . esc_html__( 'Token saved.', 'catcode-order-sync-with-keepincrm-for-woocommerce' ) . '</span>' : '' ) . '</p>';
 		echo '</td></tr>';
 
 		echo '</table></div>';
 
-		echo '<div class="ccks-card">';
-		echo '<h2>' . esc_html__( 'Маршрутизація в CRM (необов’язково)', 'keepincrm-sync-for-woocommerce' ) . '</h2>';
+		echo '<div class="cckc-card">';
+		echo '<h2>' . esc_html__( 'CRM routing (optional)', 'catcode-order-sync-with-keepincrm-for-woocommerce' ) . '</h2>';
 		echo '<table class="form-table" role="presentation">';
 		$route_fields = array(
-			'funnel_id'           => __( 'ID воронки (funnel_id)', 'keepincrm-sync-for-woocommerce' ),
-			'stage_id'            => __( 'ID етапу (stage_id)', 'keepincrm-sync-for-woocommerce' ),
-			'source_id'           => __( 'ID джерела (source_id)', 'keepincrm-sync-for-woocommerce' ),
-			'main_responsible_id' => __( 'ID відповідального (main_responsible_id)', 'keepincrm-sync-for-woocommerce' ),
+			'funnel_id'           => __( 'Funnel ID (funnel_id)', 'catcode-order-sync-with-keepincrm-for-woocommerce' ),
+			'stage_id'            => __( 'Stage ID (stage_id)', 'catcode-order-sync-with-keepincrm-for-woocommerce' ),
+			'source_id'           => __( 'Source ID (source_id)', 'catcode-order-sync-with-keepincrm-for-woocommerce' ),
+			'main_responsible_id' => __( 'Responsible user ID (main_responsible_id)', 'catcode-order-sync-with-keepincrm-for-woocommerce' ),
 		);
 		foreach ( $route_fields as $key => $label ) {
 			$val = (int) ( $cfg[ $key ] ?? 0 );
-			echo '<tr><th scope="row"><label for="ccks-' . esc_attr( $key ) . '">' . esc_html( $label ) . '</label></th><td>';
-			echo '<input type="number" min="0" step="1" class="small-text" id="ccks-' . esc_attr( $key ) . '" name="' . esc_attr( $key ) . '" value="' . esc_attr( $val > 0 ? (string) $val : '' ) . '"/>';
+			echo '<tr><th scope="row"><label for="cckc-' . esc_attr( $key ) . '">' . esc_html( $label ) . '</label></th><td>';
+			echo '<input type="number" min="0" step="1" class="small-text" id="cckc-' . esc_attr( $key ) . '" name="' . esc_attr( $key ) . '" value="' . esc_attr( $val > 0 ? (string) $val : '' ) . '"/>';
 			echo '</td></tr>';
 		}
-		echo '<tr><td colspan="2"><p class="description">' . esc_html__( 'Залиште порожнім, щоб KeepinCRM обрав значення за замовчуванням. Значення беруться з довідників кабінету (воронки, етапи, джерела, працівники).', 'keepincrm-sync-for-woocommerce' ) . '</p></td></tr>';
+		echo '<tr><td colspan="2"><p class="description">' . esc_html__( 'Leave empty to let KeepinCRM pick its own defaults. The ids come from your account dictionaries (funnels, stages, sources, employees).', 'catcode-order-sync-with-keepincrm-for-woocommerce' ) . '</p></td></tr>';
 		echo '</table></div>';
 
-		echo '<div class="ccks-card">';
-		echo '<h2>' . esc_html__( 'Відправка замовлень', 'keepincrm-sync-for-woocommerce' ) . '</h2>';
+		echo '<div class="cckc-card">';
+		echo '<h2>' . esc_html__( 'Order sending', 'catcode-order-sync-with-keepincrm-for-woocommerce' ) . '</h2>';
 		echo '<table class="form-table" role="presentation">';
 
-		echo '<tr><th scope="row">' . esc_html__( 'Тригерні статуси', 'keepincrm-sync-for-woocommerce' ) . '</th><td>';
+		echo '<tr><th scope="row">' . esc_html__( 'Trigger statuses', 'catcode-order-sync-with-keepincrm-for-woocommerce' ) . '</th><td>';
 		$selected = is_array( $cfg['trigger_statuses'] ) ? $cfg['trigger_statuses'] : array();
 		foreach ( wc_get_order_statuses() as $slug => $label ) {
 			$short = 0 === strncmp( $slug, 'wc-', 3 ) ? substr( $slug, 3 ) : $slug;
 			echo '<label style="display:block;margin:2px 0"><input type="checkbox" name="trigger_statuses[]" value="' . esc_attr( $short ) . '"' . checked( in_array( $short, $selected, true ), true, false ) . '/> ' . esc_html( $label ) . '</label>';
 		}
-		echo '<p class="description">' . esc_html__( 'Замовлення відправляється в KeepinCRM одразу після checkout або при переході в один із вибраних статусів (якщо ще не відправлено).', 'keepincrm-sync-for-woocommerce' ) . '</p>';
+		echo '<p class="description">' . esc_html__( 'An order goes to KeepinCRM right after checkout, or when it moves into one of the selected statuses — unless it is there already.', 'catcode-order-sync-with-keepincrm-for-woocommerce' ) . '</p>';
 		echo '</td></tr>';
 
-		echo '<tr><th scope="row">' . esc_html__( 'Статус оплати', 'keepincrm-sync-for-woocommerce' ) . '</th><td>';
-		echo '<label><input type="checkbox" name="pass_payment_status" value="yes"' . checked( 'yes' === $cfg['pass_payment_status'], true, false ) . '/> ' . esc_html__( 'Позначати оплату онлайн (для сплачених замовлень додавати «✅ Оплачено онлайн» у коментар заявки)', 'keepincrm-sync-for-woocommerce' ) . '</label>';
+		echo '<tr><th scope="row">' . esc_html__( 'Payment status', 'catcode-order-sync-with-keepincrm-for-woocommerce' ) . '</th><td>';
+		echo '<label><input type="checkbox" name="pass_payment_status" value="yes"' . checked( 'yes' === $cfg['pass_payment_status'], true, false ) . '/> ' . esc_html__( 'Mark online payments (add “✅ Paid online” to the agreement comment for paid orders)', 'catcode-order-sync-with-keepincrm-for-woocommerce' ) . '</label>';
 		echo '</td></tr>';
 
-		echo '<tr><th scope="row">' . esc_html__( 'Товари з нульовою ціною', 'keepincrm-sync-for-woocommerce' ) . '</th><td>';
-		echo '<label><input type="checkbox" name="skip_zero_price" value="yes"' . checked( 'yes' === $cfg['skip_zero_price'], true, false ) . '/> ' . esc_html__( 'Пропускати позиції з ціною 0 (подарунки, семпли)', 'keepincrm-sync-for-woocommerce' ) . '</label>';
+		echo '<tr><th scope="row">' . esc_html__( 'Zero-price items', 'catcode-order-sync-with-keepincrm-for-woocommerce' ) . '</th><td>';
+		echo '<label><input type="checkbox" name="skip_zero_price" value="yes"' . checked( 'yes' === $cfg['skip_zero_price'], true, false ) . '/> ' . esc_html__( 'Skip line items priced at 0 (gifts, samples)', 'catcode-order-sync-with-keepincrm-for-woocommerce' ) . '</label>';
 		echo '</td></tr>';
 
-		echo '<tr><th scope="row">' . esc_html__( 'Доставка', 'keepincrm-sync-for-woocommerce' ) . '</th><td>';
-		echo '<label><input type="checkbox" name="include_shipping" value="yes"' . checked( 'yes' === $cfg['include_shipping'], true, false ) . '/> ' . esc_html__( 'Передавати вартість доставки (shipping_costs)', 'keepincrm-sync-for-woocommerce' ) . '</label>';
+		echo '<tr><th scope="row">' . esc_html__( 'Shipping', 'catcode-order-sync-with-keepincrm-for-woocommerce' ) . '</th><td>';
+		echo '<label><input type="checkbox" name="include_shipping" value="yes"' . checked( 'yes' === $cfg['include_shipping'], true, false ) . '/> ' . esc_html__( 'Send the shipping cost as a separate agreement line', 'catcode-order-sync-with-keepincrm-for-woocommerce' ) . '</label>';
 		echo '</td></tr>';
 
 		echo '</table></div>';
 
-		echo '<div class="ccks-actions">';
-		submit_button( __( 'Зберегти налаштування', 'keepincrm-sync-for-woocommerce' ), 'primary large', 'submit', false );
+		echo '<div class="cckc-actions">';
+		submit_button( __( 'Save settings', 'catcode-order-sync-with-keepincrm-for-woocommerce' ), 'primary large', 'submit', false );
 		echo '</div>';
 		echo '</form>';
 
@@ -142,31 +145,31 @@ class SettingsPage {
 		echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" style="margin-top:4px">';
 		echo '<input type="hidden" name="action" value="cckc_test_connection"/>';
 		wp_nonce_field( 'cckc_test_connection' );
-		submit_button( __( 'Перевірити з’єднання', 'keepincrm-sync-for-woocommerce' ), 'secondary', 'submit', false );
-		echo ' <span class="description">' . esc_html__( 'Виконує запит GET /clients/statuses зі збереженим токеном.', 'keepincrm-sync-for-woocommerce' ) . '</span>';
+		submit_button( __( 'Test connection', 'catcode-order-sync-with-keepincrm-for-woocommerce' ), 'secondary', 'submit', false );
+		echo ' <span class="description">' . esc_html__( 'Sends a GET /clients/statuses request with the stored token.', 'catcode-order-sync-with-keepincrm-for-woocommerce' ) . '</span>';
 		echo '</form>';
 	}
 
 	private function render_log(): void {
 		$rows = Logger::latest( 100 );
 
-		echo '<div class="ccks-card" style="margin-top:16px">';
-		echo '<h2>' . esc_html__( 'Останні події', 'keepincrm-sync-for-woocommerce' ) . '</h2>';
+		echo '<div class="cckc-card" style="margin-top:16px">';
+		echo '<h2>' . esc_html__( 'Recent events', 'catcode-order-sync-with-keepincrm-for-woocommerce' ) . '</h2>';
 
 		if ( empty( $rows ) ) {
-			echo '<p>' . esc_html__( 'Подій ще немає.', 'keepincrm-sync-for-woocommerce' ) . '</p></div>';
+			echo '<p>' . esc_html__( 'No events yet.', 'catcode-order-sync-with-keepincrm-for-woocommerce' ) . '</p></div>';
 			return;
 		}
 
 		echo '<table class="widefat striped">';
 		echo '<thead><tr>';
-		echo '<th>' . esc_html__( 'Дата', 'keepincrm-sync-for-woocommerce' ) . '</th>';
-		echo '<th>' . esc_html__( 'Замовлення', 'keepincrm-sync-for-woocommerce' ) . '</th>';
-		echo '<th>' . esc_html__( 'Подія', 'keepincrm-sync-for-woocommerce' ) . '</th>';
-		echo '<th>' . esc_html__( 'Спроба', 'keepincrm-sync-for-woocommerce' ) . '</th>';
+		echo '<th>' . esc_html__( 'Date', 'catcode-order-sync-with-keepincrm-for-woocommerce' ) . '</th>';
+		echo '<th>' . esc_html__( 'Order', 'catcode-order-sync-with-keepincrm-for-woocommerce' ) . '</th>';
+		echo '<th>' . esc_html__( 'Event', 'catcode-order-sync-with-keepincrm-for-woocommerce' ) . '</th>';
+		echo '<th>' . esc_html__( 'Attempt', 'catcode-order-sync-with-keepincrm-for-woocommerce' ) . '</th>';
 		echo '<th>HTTP</th>';
-		echo '<th>' . esc_html__( 'Результат', 'keepincrm-sync-for-woocommerce' ) . '</th>';
-		echo '<th>' . esc_html__( 'Повідомлення', 'keepincrm-sync-for-woocommerce' ) . '</th>';
+		echo '<th>' . esc_html__( 'Result', 'catcode-order-sync-with-keepincrm-for-woocommerce' ) . '</th>';
+		echo '<th>' . esc_html__( 'Message', 'catcode-order-sync-with-keepincrm-for-woocommerce' ) . '</th>';
 		echo '</tr></thead><tbody>';
 
 		foreach ( $rows as $r ) {
@@ -178,7 +181,7 @@ class SettingsPage {
 			echo '<td>' . esc_html( (string) $r['event'] ) . '</td>';
 			echo '<td>' . esc_html( (string) $r['attempt_no'] ) . '</td>';
 			echo '<td>' . esc_html( (string) ( $r['http_status'] ?? '—' ) ) . '</td>';
-			echo '<td>' . ( $r['success'] ? '<span style="color:#1a7f37;font-weight:600">OK</span>' : '<span style="color:#a00;font-weight:600">' . esc_html__( 'Помилка', 'keepincrm-sync-for-woocommerce' ) . '</span>' ) . '</td>';
+			echo '<td>' . ( $r['success'] ? '<span style="color:#1a7f37;font-weight:600">OK</span>' : '<span style="color:#a00;font-weight:600">' . esc_html__( 'Error', 'catcode-order-sync-with-keepincrm-for-woocommerce' ) . '</span>' ) . '</td>';
 			echo '<td><code style="font-size:11px">' . esc_html( mb_substr( (string) $r['message'], 0, 200 ) ) . '</code></td>';
 			echo '</tr>';
 		}
@@ -187,7 +190,7 @@ class SettingsPage {
 
 	public function handle_save(): void {
 		if ( ! current_user_can( 'manage_woocommerce' ) ) {
-			wp_die( esc_html__( 'Немає прав', 'keepincrm-sync-for-woocommerce' ) );
+			wp_die( esc_html__( 'You do not have permission to do this.', 'catcode-order-sync-with-keepincrm-for-woocommerce' ) );
 		}
 		check_admin_referer( 'cckc_save_settings' );
 
@@ -220,12 +223,12 @@ class SettingsPage {
 			)
 		);
 
-		$this->redirect( __( 'Налаштування збережено.', 'keepincrm-sync-for-woocommerce' ), false );
+		$this->redirect( __( 'Settings saved.', 'catcode-order-sync-with-keepincrm-for-woocommerce' ), false );
 	}
 
 	public function handle_test(): void {
 		if ( ! current_user_can( 'manage_woocommerce' ) ) {
-			wp_die( esc_html__( 'Немає прав', 'keepincrm-sync-for-woocommerce' ) );
+			wp_die( esc_html__( 'You do not have permission to do this.', 'catcode-order-sync-with-keepincrm-for-woocommerce' ) );
 		}
 		check_admin_referer( 'cckc_test_connection' );
 
@@ -236,10 +239,10 @@ class SettingsPage {
 
 		if ( $res['ok'] ) {
 			/* translators: %d — HTTP status code. */
-			$this->redirect( sprintf( __( 'З’єднання успішне (HTTP %d).', 'keepincrm-sync-for-woocommerce' ), $res['status'] ), false );
+			$this->redirect( sprintf( __( 'Connection successful (HTTP %d).', 'catcode-order-sync-with-keepincrm-for-woocommerce' ), $res['status'] ), false );
 		}
 		/* translators: %s — error details. */
-		$this->redirect( sprintf( __( 'Помилка з’єднання: %s', 'keepincrm-sync-for-woocommerce' ), $res['error'] ), true );
+		$this->redirect( sprintf( __( 'Connection error: %s', 'catcode-order-sync-with-keepincrm-for-woocommerce' ), $res['error'] ), true );
 	}
 
 	private function redirect( string $msg, bool $is_error ): void {
@@ -258,21 +261,30 @@ class SettingsPage {
 	}
 
 	/**
-	 * Scoped styles printed only on this screen.
+	 * Enqueue scoped admin styles only on this settings screen,
+	 * via a registered handle + wp_add_inline_style (no raw <style> output).
+	 *
+	 * @param string $hook_suffix Current admin page hook suffix.
 	 */
-	private function assets(): void {
-		?>
-<style>
-.ccks-wrap{max-width:880px}
-.ccks-wrap .ccks-lead{font-size:14px;color:#50575e;margin:.2em 0 1em}
-.ccks-card{background:#fff;border:1px solid #dcdcde;border-radius:8px;padding:8px 22px 18px;margin:16px 0 18px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
-.ccks-card>h2{font-size:15px;margin:14px 0 2px;padding:0;border:0}
-.ccks-card .form-table th{padding-top:16px;padding-bottom:16px;width:220px;font-weight:600}
-.ccks-card .form-table td{padding-top:14px;padding-bottom:14px}
-.ccks-card .ccks-saved{color:#1a7f37;font-weight:600}
-.ccks-actions{padding:4px 0 8px}
-.ccks-actions .button-large{padding:6px 26px;height:auto;font-size:14px}
-</style>
-		<?php
+	public function enqueue_assets( $hook_suffix ): void {
+		if ( '' === $this->hook_suffix || $hook_suffix !== $this->hook_suffix ) {
+			return;
+		}
+
+		wp_register_style( 'cc-keepincrm-admin', false, array(), CCKC_VERSION );
+		wp_enqueue_style( 'cc-keepincrm-admin' );
+
+		$css = '
+.cckc-wrap{max-width:880px}
+.cckc-wrap .cckc-lead{font-size:14px;color:#50575e;margin:.2em 0 1em}
+.cckc-card{background:#fff;border:1px solid #dcdcde;border-radius:8px;padding:8px 22px 18px;margin:16px 0 18px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.cckc-card>h2{font-size:15px;margin:14px 0 2px;padding:0;border:0}
+.cckc-card .form-table th{padding-top:16px;padding-bottom:16px;width:220px;font-weight:600}
+.cckc-card .form-table td{padding-top:14px;padding-bottom:14px}
+.cckc-card .cckc-saved{color:#1a7f37;font-weight:600}
+.cckc-actions{padding:4px 0 8px}
+.cckc-actions .button-large{padding:6px 26px;height:auto;font-size:14px}
+';
+		wp_add_inline_style( 'cc-keepincrm-admin', $css );
 	}
 }

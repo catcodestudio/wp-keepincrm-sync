@@ -20,8 +20,13 @@ class Sender {
 	public const META_STATUS     = '_cc_keepincrm_status';
 	public const META_LAST_ERROR = '_cc_keepincrm_last_error';
 	public const META_SENT_AT    = '_cc_keepincrm_sent_at';
+	/** Set when an attempt got no HTTP response at all — the agreement may still exist in the CRM. */
+	public const META_UNCERTAIN  = '_cc_keepincrm_uncertain';
 
 	private const MAX_ATTEMPTS = 3;
+
+	/** Seconds after which a lock left by a dead request is considered stale. */
+	private const LOCK_TTL = 120;
 
 	/** Backoff delays between attempt N and N+1, seconds: 5 min, 30 min, 2 h. */
 	private const BACKOFF = array( 300, 1800, 7200 );
@@ -102,14 +107,78 @@ class Sender {
 			return;
 		}
 
-		// Guard against double fire (checkout hook + status hook in one request).
-		$lock = 'cckc_lock_' . $order->get_id();
-		if ( get_transient( $lock ) ) {
+		// Checkout hook, status hook and a payment callback can land on the
+		// same order in parallel. A transient guard is a read-then-write, so
+		// both requests pass it and KeepinCRM gets the order twice; the raw
+		// INSERT below lets exactly one through.
+		$lock = 'cc_keepincrm_lock_' . $order->get_id();
+		if ( ! $this->lock_acquire( $lock ) ) {
 			return;
 		}
-		set_transient( $lock, 1, 30 );
 
-		$this->send( $order, 1 );
+		try {
+			// The winner may have written while we were taking the lock —
+			// decide on fresh state, not on our in-request copy.
+			$order = self::reload_order( $order->get_id(), $order );
+			if ( '' !== (string) $order->get_meta( self::META_AGREEMENT_ID ) ) {
+				return;
+			}
+			$this->send( $order, 1 );
+		} finally {
+			$this->lock_release( $lock );
+		}
+	}
+
+	/**
+	 * Take the lock, or fail if somebody else holds it.
+	 *
+	 * add_option() cannot be used here: WordPress runs it as
+	 * INSERT ... ON DUPLICATE KEY UPDATE, so it reports success even when the
+	 * row already exists and both requests believe they hold the lock.
+	 */
+	private function lock_acquire( string $name ): bool {
+		global $wpdb;
+
+		// A request that died mid-flight must not block the order forever.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- lock row.
+		$wpdb->query( $wpdb->prepare( 'DELETE FROM %i WHERE option_name = %s AND CAST(option_value AS UNSIGNED) < %d', $wpdb->options, $name, time() - self::LOCK_TTL ) );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- lock row.
+		$rows = $wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO %i (option_name, option_value, autoload) VALUES (%s, %s, 'no')", $wpdb->options, $name, (string) time() ) );
+
+		wp_cache_delete( $name, 'options' );
+		wp_cache_delete( 'notoptions', 'options' );
+
+		return (int) $rows > 0;
+	}
+
+	private function lock_release( string $name ): void {
+		global $wpdb;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- lock row.
+		$wpdb->query( $wpdb->prepare( 'DELETE FROM %i WHERE option_name = %s', $wpdb->options, $name ) );
+		wp_cache_delete( $name, 'options' );
+		wp_cache_delete( 'notoptions', 'options' );
+	}
+
+	/**
+	 * Re-read an order past every cache layer, including the HPOS order cache
+	 * that classic invalidation does not touch.
+	 */
+	private static function reload_order( int $order_id, \WC_Order $fallback ): \WC_Order {
+		wp_cache_delete( $order_id, 'orders' );
+		wp_cache_delete( $order_id, 'order-items' );
+		clean_post_cache( $order_id );
+
+		if ( function_exists( 'wc_get_container' ) && class_exists( '\Automattic\WooCommerce\Caches\OrderCache' ) ) {
+			try {
+				wc_get_container()->get( \Automattic\WooCommerce\Caches\OrderCache::class )->remove( $order_id );
+			} catch ( \Throwable $e ) {
+				unset( $e ); // Older WooCommerce without the order cache in its container.
+			}
+		}
+
+		$fresh = wc_get_order( $order_id );
+
+		return $fresh instanceof \WC_Order ? $fresh : $fallback;
 	}
 
 	/**
@@ -122,7 +191,7 @@ class Sender {
 		if ( ! Settings::is_configured() ) {
 			return array(
 				'ok'      => false,
-				'message' => __( 'API-ключ KeepinCRM не задано.', 'keepincrm-sync-for-woocommerce' ),
+				'message' => __( 'The KeepinCRM API token is not set.', 'catcode-order-sync-with-keepincrm-for-woocommerce' ),
 			);
 		}
 
@@ -146,7 +215,7 @@ class Sender {
 				return array(
 					'ok'      => true,
 					/* translators: %d — KeepinCRM order id. */
-					'message' => sprintf( __( 'Замовлення оновлено в KeepinCRM (ID %d).', 'keepincrm-sync-for-woocommerce' ), $existing ),
+					'message' => sprintf( __( 'Order updated in KeepinCRM (ID %d).', 'catcode-order-sync-with-keepincrm-for-woocommerce' ), $existing ),
 				);
 			}
 			return array(
@@ -155,11 +224,34 @@ class Sender {
 			);
 		}
 
-		$ok = $this->send( $order, 1, false );
+		// Two managers pressing "Send" at the same moment must not create two
+		// agreements either — the create path takes the same lock as the hooks.
+		$lock = 'cc_keepincrm_lock_' . $order->get_id();
+		if ( ! $this->lock_acquire( $lock ) ) {
+			return array(
+				'ok'      => false,
+				'message' => __( 'This order is already being sent to KeepinCRM. Reload the page in a few seconds.', 'catcode-order-sync-with-keepincrm-for-woocommerce' ),
+			);
+		}
+
+		try {
+			$order = self::reload_order( $order->get_id(), $order );
+			if ( (int) $order->get_meta( self::META_AGREEMENT_ID ) > 0 ) {
+				return array(
+					'ok'      => true,
+					/* translators: %d — KeepinCRM order id. */
+					'message' => sprintf( __( 'Order updated in KeepinCRM (ID %d).', 'catcode-order-sync-with-keepincrm-for-woocommerce' ), (int) $order->get_meta( self::META_AGREEMENT_ID ) ),
+				);
+			}
+			$ok = $this->send( $order, 1, false );
+		} finally {
+			$this->lock_release( $lock );
+		}
+
 		return array(
 			'ok'      => $ok,
 			'message' => $ok
-				? __( 'Замовлення відправлено в KeepinCRM.', 'keepincrm-sync-for-woocommerce' )
+				? __( 'Order sent to KeepinCRM.', 'catcode-order-sync-with-keepincrm-for-woocommerce' )
 				: (string) $order->get_meta( self::META_LAST_ERROR ),
 		);
 	}
@@ -191,7 +283,7 @@ class Sender {
 			$order->save();
 
 			/* translators: %d — KeepinCRM order id. */
-			$order->add_order_note( sprintf( __( 'Замовлення відправлено в KeepinCRM, ID %d.', 'keepincrm-sync-for-woocommerce' ), $keepincrm_id ) );
+			$order->add_order_note( sprintf( __( 'Order sent to KeepinCRM, agreement ID %d.', 'catcode-order-sync-with-keepincrm-for-woocommerce' ), $keepincrm_id ) );
 			Logger::log( $order->get_id(), 'create', $attempt, $res['status'], 'KeepinCRM ID ' . $keepincrm_id, true );
 
 			/**
@@ -207,8 +299,18 @@ class Sender {
 		$error = trim( $res['error'] . ' ' . mb_substr( $res['body'], 0, 500 ) );
 		$order->update_meta_data( self::META_STATUS, 'failed' );
 		$order->update_meta_data( self::META_LAST_ERROR, $error );
+
+		// Status 0 = the request never came back (timeout, dropped connection).
+		// KeepinCRM has no external id on agreements, so we cannot ask it
+		// whether this order landed — the retry below may create a second
+		// agreement. Flag it so the shop owner can check instead of finding
+		// the duplicate in the CRM later.
+		$uncertain = 0 === (int) $res['status'];
+		if ( $uncertain ) {
+			$order->update_meta_data( self::META_UNCERTAIN, '1' );
+		}
 		$order->save();
-		Logger::log( $order->get_id(), 'create', $attempt, $res['status'], $error, false );
+		Logger::log( $order->get_id(), $uncertain ? 'no_response' : 'create', $attempt, $res['status'], $error, false );
 
 		if ( $schedule_retry && $attempt < self::MAX_ATTEMPTS ) {
 			$delay = self::BACKOFF[ $attempt - 1 ] ?? 7200;

@@ -1,6 +1,6 @@
 <?php
 /**
- * Turns a WC_Order into a KeepinCRM "agreement" (угода) payload.
+ * Turns a WC_Order into a KeepinCRM "agreement" payload.
  *
  * KeepinCRM's POST /agreements body is nested: title, total, currency, comment,
  * client_attributes{person,company,email,phones[],lead,comment}, and
@@ -70,7 +70,7 @@ class OrderMapper {
 			$ship_cost = round( (float) $order->get_shipping_total() + (float) $order->get_shipping_tax(), 2 );
 			if ( $ship_cost > 0 ) {
 				$ship_title = (string) $order->get_shipping_method();
-				$ship_title = '' !== $ship_title ? $ship_title : __( 'Доставка', 'keepincrm-sync-for-woocommerce' );
+				$ship_title = '' !== $ship_title ? $ship_title : __( 'Shipping', 'catcode-order-sync-with-keepincrm-for-woocommerce' );
 				$jobs[]     = array(
 					'amount'             => 1,
 					'title'              => $ship_title,
@@ -90,7 +90,7 @@ class OrderMapper {
 			$person = (string) $order->get_billing_email();
 		}
 		if ( '' === $person ) {
-			$person = __( 'Клієнт', 'keepincrm-sync-for-woocommerce' );
+			$person = __( 'Customer', 'catcode-order-sync-with-keepincrm-for-woocommerce' );
 		}
 
 		// KeepinCRM uses `company` as the client's display name ("Назва чи ПІБ")
@@ -118,13 +118,17 @@ class OrderMapper {
 			$comment = '' !== $comment ? $comment . ' | ' . $pay : $pay;
 		}
 		if ( 'yes' === ( $cfg['pass_payment_status'] ?? 'yes' ) && ( $order->is_paid() || null !== $order->get_date_paid() ) ) {
-			$note    = sprintf( /* translators: %s: order total */ __( '✅ Оплачено онлайн (%s)', 'keepincrm-sync-for-woocommerce' ), wp_strip_all_tags( wc_price( $order->get_total(), array( 'currency' => $order->get_currency() ) ) ) );
+			// wc_price() returns markup with the currency as an HTML entity
+			// (&#8372;) — strip the tags AND decode, or the CRM comment shows
+			// the raw entity instead of ₴.
+			$price   = html_entity_decode( wp_strip_all_tags( wc_price( $order->get_total(), array( 'currency' => $order->get_currency() ) ) ), ENT_QUOTES, 'UTF-8' );
+			$note    = sprintf( /* translators: %s: order total */ __( '✅ Paid online (%s)', 'catcode-order-sync-with-keepincrm-for-woocommerce' ), $price );
 			$comment = '' !== $comment ? $comment . ' | ' . $note : $note;
 		}
 
 		$payload = array(
 			/* translators: 1: order number, 2: shop host. */
-			'title'                   => sprintf( __( 'Замовлення #%1$s (%2$s)', 'keepincrm-sync-for-woocommerce' ), $order->get_order_number(), (string) wp_parse_url( home_url(), PHP_URL_HOST ) ),
+			'title'                   => sprintf( __( 'Order #%1$s (%2$s)', 'catcode-order-sync-with-keepincrm-for-woocommerce' ), $order->get_order_number(), (string) wp_parse_url( home_url(), PHP_URL_HOST ) ),
 			'total'                   => round( (float) $order->get_total(), 2 ),
 			'currency'                => (string) $order->get_currency(),
 			'products_total_as_total' => true,

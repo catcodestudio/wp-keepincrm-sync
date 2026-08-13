@@ -1,9 +1,9 @@
 <?php
 /**
- * Plugin Name: KeepinCRM Sync for WooCommerce
- * Plugin URI: https://catcode.com.ua/plugins/keepincrm-sync-for-woocommerce
- * Description: Автоматична відправка замовлень WooCommerce у KeepinCRM: створення замовлення в CRM після checkout, дедуплікація, повторні спроби, журнал подій.
- * Version: 0.1.0
+ * Plugin Name: CatCode Order Sync with KeepinCRM for WooCommerce
+ * Plugin URI: https://catcode.com.ua/modules/keepincrm-sync-for-woocommerce/
+ * Description: Sends WooCommerce orders to KeepinCRM as agreements: created at checkout or on a status change, with de-duplication, retries and an event log.
+ * Version: 0.2.0
  * Requires at least: 6.2
  * Requires PHP: 7.4
  * Requires Plugins: woocommerce
@@ -11,9 +11,9 @@
  * Author URI: https://catcode.com.ua
  * License: GPLv2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain: keepincrm-sync-for-woocommerce
+ * Text Domain: catcode-order-sync-with-keepincrm-for-woocommerce
  * Domain Path: /languages
- * WC requires at least: 7.0
+ * WC requires at least: 6.0
  * WC tested up to: 10.7
  *
  * @package CcKeepincrmSync
@@ -24,7 +24,7 @@ defined( 'ABSPATH' ) || exit;
 // Per-constant guards keep WP's activation sandbox-scrape (which includes this
 // file twice) from emitting "already defined" warnings — without ever skipping
 // the autoloader/hook registration below.
-defined( 'CCKC_VERSION' ) || define( 'CCKC_VERSION', '0.1.0' );
+defined( 'CCKC_VERSION' ) || define( 'CCKC_VERSION', '0.2.0' );
 defined( 'CCKC_FILE' ) || define( 'CCKC_FILE', __FILE__ );
 defined( 'CCKC_DIR' ) || define( 'CCKC_DIR', plugin_dir_path( __FILE__ ) );
 defined( 'CCKC_URL' ) || define( 'CCKC_URL', plugin_dir_url( __FILE__ ) );
@@ -83,7 +83,7 @@ add_action(
 			add_action(
 				'admin_notices',
 				static function () {
-					echo '<div class="notice notice-error"><p>' . esc_html__( 'Для роботи KeepinCRM Sync for WooCommerce потрібен активний WooCommerce.', 'keepincrm-sync-for-woocommerce' ) . '</p></div>';
+					echo '<div class="notice notice-error"><p>' . esc_html__( 'CatCode Order Sync with KeepinCRM for WooCommerce requires an active WooCommerce installation.', 'catcode-order-sync-with-keepincrm-for-woocommerce' ) . '</p></div>';
 				}
 			);
 			return;
